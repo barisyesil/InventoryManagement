@@ -36,39 +36,34 @@ public class InventoryManagement {
         System.out.println("Yıllık talep: " + annualDemand);
 
 
-
-
-
-
-
-
-
-
-
         // Burada z-chart verilerini okuyup ilgili hesaplamaları yapacağız
         // zChart.tsv dosyasından z-chart verilerini okuyun
         ZChart zChart = new ZChart("zChart.tsv");
 
         // İlk Q ve R hesaplamalarını yapalım
         double Q0 = Math.sqrt((2 * orderingCost * annualDemand) / holdingCost);
-        double FRn =
-        double zValue = zChart.lookupZValue();
+        double FRn = 1-((Q0*holdingCost) / (penaltyCost*annualDemand));
+        double zValue = zChart.lookupZValue(FRn);
         double R0 = leadTimeDemand + (zValue * leadTimeStdDev);
+        System.out.println("-----------" + "Q0="   + Q0 +" FRn= " + FRn + "  z değeri ise " + zValue + "   R0= " + R0 );
 
 
-        //System.out.println("Z DEĞERİ::::" + zValue);
-        // System.out.println()
-
+        // GEREKEN DEĞERLERİ BULUYORUZ
+        double Lz= zChart.lookupLValue(zValue);
+        double nR= leadTimeStdDev*Lz;
 
         // Döngü ile optimum Q ve R hesaplayın
         double Qn, Rn;
         int iteration = 0;
         double tolerance = 0.01;
-        do {
-            iteration++;
-            Qn = Math.sqrt(  (2*annualDemand* (orderingCost+(penaltyCost*nR)) )  /holdingCost);
-            double F_Rn = zChart.lookupFValue(R0);
-            zValue = zChart.lookupZValue(F_Rn);
+
+            do {
+                 iteration++;
+
+            Qn = Math.sqrt(  (2*annualDemand* (orderingCost+(penaltyCost)) )  /holdingCost);
+
+            FRn = 1-((Qn*holdingCost) / (penaltyCost*annualDemand));
+            zValue = zChart.lookupZValue(FRn);
             Rn = leadTimeDemand + (zValue * leadTimeStdDev);
             if (Math.abs(Qn - Q0) < tolerance && Math.abs(Rn - R0) < tolerance) {
                 break;

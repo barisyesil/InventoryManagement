@@ -3,14 +3,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class ZChart {
-    private Map<Double, Double> fValues;
-    private Map<Double, Double> lValues;
+    private TreeMap<Double, Double> fValues;
+    private TreeMap<Double, Double> lValues;
 
     public ZChart(String filePath) {
-        fValues = new HashMap<>();
-        lValues = new HashMap<>();
+        fValues = new TreeMap<>();
+        lValues = new TreeMap<>();
         loadZChart(filePath);
     }
 
@@ -32,19 +33,57 @@ public class ZChart {
     }
 
     public double lookupFValue(double z) {
-        return fValues.getOrDefault(z, 0.0);
+        if (fValues.containsKey(z)) {
+            return fValues.get(z);
+        }
+        // En yakın anahtar değerlerini bul
+        Map.Entry<Double, Double> lowerEntry = fValues.floorEntry(z);
+        Map.Entry<Double, Double> higherEntry = fValues.ceilingEntry(z);
+        // En yakın değeri döndür
+        if (lowerEntry == null && higherEntry == null) {
+            return 0.0;
+        } else if (lowerEntry == null) {
+            return higherEntry.getValue();
+        } else if (higherEntry == null) {
+            return lowerEntry.getValue();
+        } else {
+            double lowerDiff = Math.abs(z - lowerEntry.getKey());
+            double higherDiff = Math.abs(z - higherEntry.getKey());
+            return lowerDiff <= higherDiff ? lowerEntry.getValue() : higherEntry.getValue();
+        }
     }
 
     public double lookupLValue(double z) {
-        return lValues.getOrDefault(z, 0.0);
+        if (lValues.containsKey(z)) {
+            return lValues.get(z);
+        }
+        // En yakın anahtar değerlerini bul
+        Map.Entry<Double, Double> lowerEntry = lValues.floorEntry(z);
+        Map.Entry<Double, Double> higherEntry = lValues.ceilingEntry(z);
+        // En yakın değeri döndür
+        if (lowerEntry == null && higherEntry == null) {
+            return 0.0;
+        } else if (lowerEntry == null) {
+            return higherEntry.getValue();
+        } else if (higherEntry == null) {
+            return lowerEntry.getValue();
+        } else {
+            double lowerDiff = Math.abs(z - lowerEntry.getKey());
+            double higherDiff = Math.abs(z - higherEntry.getKey());
+            return lowerDiff <= higherDiff ? lowerEntry.getValue() : higherEntry.getValue();
+        }
     }
 
     public double lookupZValue(double f) {
+        double closestZ = 0.0;
+        double minDiff = Double.MAX_VALUE;
         for (Map.Entry<Double, Double> entry : fValues.entrySet()) {
-            if (entry.getValue() == f) {
-                return entry.getKey();
+            double diff = Math.abs(entry.getValue() - f);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closestZ = entry.getKey();
             }
         }
-        return 0.0;
+        return closestZ;
     }
 }

@@ -4,7 +4,7 @@ public class Equations {
 
     public double find_Qn (double annualDemand, double orderingCost, double penaltyCost, double nR, double holdingCost){
 
-        return Math.sqrt(  (2*annualDemand* (orderingCost+(penaltyCost*nR)) )  /holdingCost);
+        return Math.sqrt((2*annualDemand* (orderingCost+(penaltyCost*nR)))/holdingCost);
 
     }
 
