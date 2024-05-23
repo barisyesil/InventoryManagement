@@ -5,35 +5,35 @@ public class InventoryManagement {
         Scanner scanner = new Scanner(System.in);
 
         // Maliyetleri ve faiz oranını kullanıcıdan alın
-        System.out.print("Birim maliyeti girin: ");
+        System.out.print("Please enter the unit cost: ");
         double unitCost = scanner.nextDouble();
 
-        System.out.print("Sipariş maliyetini girin: ");
+        System.out.print("Please enter the bookkeeping expense: ");
         double orderingCost = scanner.nextDouble();
 
-        System.out.print("Ceza maliyetini girin: ");
+        System.out.print("Please enter the penalty cost: ");
         double penaltyCost = scanner.nextDouble();
 
-        System.out.print("Faiz oranını girin (Lütfen kesir biçiminde giriniz (örn; '0.25').): ");
+        System.out.print("Please enter the annual interest rate (Please enter in fraction format [e.g. '0.25' ].): ");
         double interestRate = scanner.nextDouble();
 
         // Holding cost hesapla
         double holdingCost = unitCost * interestRate;
-        System.out.println("Taşıma maliyeti: " + holdingCost);
+        System.out.println("Holding Cost : " + holdingCost);
 
         // Kullanıcıdan diğer bilgileri alın
-        System.out.print("Tedarik süresini (ay) girin: ");
+        System.out.print("Please enter the lead time(month): ");
         double leadTime = scanner.nextDouble();
 
-        System.out.print("Tedarik süresi talebini girin: ");
+        System.out.print("Please enter the lead time demand: ");
         double leadTimeDemand = scanner.nextDouble();
 
-        System.out.print("Tedarik süresi standart sapmasını girin: ");
+        System.out.print("Please enter the lead time standard deviation: ");
         double leadTimeStdDev = scanner.nextDouble();
 
         // Yıllık talep hesapla
         double annualDemand = (12 / leadTime) * leadTimeDemand;
-        System.out.println("Yıllık talep: " + annualDemand);
+        System.out.println("Annual Demand is: " + annualDemand);
 
 
         // Burada z-chart verilerini okuyup ilgili hesaplamaları yapacağız
