@@ -14,7 +14,7 @@ public class InventoryManagement {
         System.out.print("Ceza maliyetini girin: ");
         double penaltyCost = scanner.nextDouble();
 
-        System.out.print("Faiz oranını girin: ");
+        System.out.print("Faiz oranını girin (Lütfen kesir biçiminde giriniz (örn; '0.25').): ");
         double interestRate = scanner.nextDouble();
 
         // Holding cost hesapla
@@ -45,26 +45,32 @@ public class InventoryManagement {
         double FRn = 1-((Q0*holdingCost) / (penaltyCost*annualDemand));
         double zValue = zChart.lookupZValue(FRn);
         double R0 = leadTimeDemand + (zValue * leadTimeStdDev);
-        System.out.println("-----------" + "Q0="   + Q0 +" FRn= " + FRn + "  z değeri ise " + zValue + "   R0= " + R0 );
+
+        System.out.println("------------------------------------\n" + "PROGRAM AKIŞINI GÖRMEK İÇİN EKLEDİM BUNLARI. DAHA SONRA ÇIKARILACAK.\n" + "------------------------------------");
+
+        System.out.println( "Q0="   + Q0 +" FRn= " + FRn + "  z değeri ise " + zValue + "   R0= " + R0 );
 
 
-        // GEREKEN DEĞERLERİ BULUYORUZ
-        double Lz= zChart.lookupLValue(zValue);
-        double nR= leadTimeStdDev*Lz;
 
         // Döngü ile optimum Q ve R hesaplayın
-        double Qn, Rn;
+        double Qn, Rn, nR, Lz;
         int iteration = 0;
         double tolerance = 0.01;
 
             do {
                  iteration++;
 
-            Qn = Math.sqrt(  (2*annualDemand* (orderingCost+(penaltyCost)) )  /holdingCost);
-
+                 Lz= zChart.lookupLValue(zValue);
+                 nR= leadTimeStdDev*Lz;
+            Qn = Math.sqrt(  (2*annualDemand* (orderingCost+(penaltyCost* nR )) )  /holdingCost);
             FRn = 1-((Qn*holdingCost) / (penaltyCost*annualDemand));
             zValue = zChart.lookupZValue(FRn);
             Rn = leadTimeDemand + (zValue * leadTimeStdDev);
+
+                System.out.println(iteration + ".  Qn: " + Qn);
+                System.out.println(iteration + ".  Z: " +zValue );
+                System.out.println(iteration + ".  R: " + Rn );
+
             if (Math.abs(Qn - Q0) < tolerance && Math.abs(Rn - R0) < tolerance) {
                 break;
             }
@@ -73,15 +79,17 @@ public class InventoryManagement {
         } while (true);
 
         // Sonuçları göster
-        double safetyStock = zValue * leadTimeStdDev;
-        double averageAnnualHoldingCost = (Qn / 2) * holdingCost;
+        double safetyStock = Rn-leadTimeDemand;
+        double averageAnnualHoldingCost = ((Qn / 2) + Rn-leadTimeDemand) * holdingCost;
         double averageSetupCost = (annualDemand / Qn) * orderingCost;
-        double averagePenaltyCost = zChart.lookupLValue(zValue) * unitCost;
+        double averagePenaltyCost = (penaltyCost*annualDemand*nR)/Qn;
+        double averageTimeBetweenOrders = 12*Qn / annualDemand;
 
-        double averageTimeBetweenOrders = 365 / (annualDemand / Qn);
-        double proportionOfOrderCyclesWithNoStockout = 1 - zChart.lookupFValue(R0);
-        double proportionOfDemandNotMet = zChart.lookupFValue(R0);
+        //Bu İKİ kısımdan emin değilim tekrar bakılacak. slaytta var.
+        double proportionOfOrderCyclesWithNoStockout = FRn;
+        double proportionOfDemandNotMet = nR/Qn;
 
+        System.out.println("------------------------------------\n" + "ASIL İSTENENLER.\n" + "------------------------------------");
         System.out.println("Optimal lot size (Q): " + Qn);
         System.out.println("Reorder point (R): " + Rn);
         System.out.println("Number of iterations: " + iteration);
@@ -90,7 +98,8 @@ public class InventoryManagement {
         System.out.println("Average setup cost: " + averageSetupCost);
         System.out.println("Average penalty cost: " + averagePenaltyCost);
         System.out.println("Average time between orders: " + averageTimeBetweenOrders);
-        System.out.println("Proportion of order cycles with no stockout: " + proportionOfOrderCyclesWithNoStockout);
-        System.out.println("Proportion of demand not met: " + proportionOfDemandNotMet);
+        System.out.println("Proportion of order cycles with no stockout: %" + 100*proportionOfOrderCyclesWithNoStockout);
+        System.out.println("Proportion of demand not met: %" + 100*proportionOfDemandNotMet);
+        System.out.println("Proportion of demand that are met: %" +  (100*(1-proportionOfDemandNotMet) ));
     }
 }
