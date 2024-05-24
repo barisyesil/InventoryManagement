@@ -4,55 +4,46 @@ public class InventoryManagement {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // Maliyetleri ve faiz oranını kullanıcıdan alın
-        System.out.print("Please enter the unit cost: ");
+        System.out.println("Please enter the unit cost: ");
         double unitCost = scanner.nextDouble();
 
-        System.out.print("Please enter the bookkeeping expense: ");
+        System.out.println("Please enter the bookkeeping expense: ");
         double orderingCost = scanner.nextDouble();
 
-        System.out.print("Please enter the penalty cost: ");
+        System.out.println("Please enter the penalty cost: ");
         double penaltyCost = scanner.nextDouble();
 
-        System.out.print("Please enter the annual interest rate (Please enter in fraction format [e.g. '0.25' ].): ");
+        System.out.println("Please enter the annual interest rate (Please enter in fraction format [e.g. '0.25' ].): ");
         double interestRate = scanner.nextDouble();
 
-        // Holding cost hesapla
+        System.out.println("Please enter the lead time(month): ");
+        double leadTime = scanner.nextDouble();
+
+        System.out.println("Please enter the lead time demand: ");
+        double leadTimeDemand = scanner.nextDouble();
+
+        System.out.println("Please enter the lead time standard deviation: ");
+        double leadTimeStdDev = scanner.nextDouble();
+
+
         double holdingCost = unitCost * interestRate;
         System.out.println("Holding Cost : " + holdingCost);
 
-        // Kullanıcıdan diğer bilgileri alın
-        System.out.print("Please enter the lead time(month): ");
-        double leadTime = scanner.nextDouble();
-
-        System.out.print("Please enter the lead time demand: ");
-        double leadTimeDemand = scanner.nextDouble();
-
-        System.out.print("Please enter the lead time standard deviation: ");
-        double leadTimeStdDev = scanner.nextDouble();
-
-        // Yıllık talep hesapla
         double annualDemand = (12 / leadTime) * leadTimeDemand;
         System.out.println("Annual Demand is: " + annualDemand);
 
 
-        // Burada z-chart verilerini okuyup ilgili hesaplamaları yapacağız
-        // zChart.tsv dosyasından z-chart verilerini okuyun
         ZChart zChart = new ZChart("zChart.tsv");
 
-        // İlk Q ve R hesaplamalarını yapalım
         double Q0 = Math.sqrt((2 * orderingCost * annualDemand) / holdingCost);
         double FRn = 1-((Q0*holdingCost) / (penaltyCost*annualDemand));
         double zValue = zChart.lookupZValue(FRn);
         double R0 = leadTimeDemand + (zValue * leadTimeStdDev);
-
-        System.out.println("------------------------------------\n" + "PROGRAM AKIŞINI GÖRMEK İÇİN EKLEDİM BUNLARI. DAHA SONRA ÇIKARILACAK.\n" + "------------------------------------");
-
-        System.out.println( "Q0="   + Q0 +" FRn= " + FRn + "  z değeri ise " + zValue + "   R0= " + R0 );
+        System.out.println( "Q0="   + Q0 +" FRn= " + FRn + "  z-value " + zValue + "   R0= " + R0 );
 
 
+        System.out.println("------------------------------------\n" + "Iterations step by step\n" + "------------------------------------");
 
-        // Döngü ile optimum Q ve R hesaplayın
         double Qn, Rn, nR, Lz;
         int iteration = 0;
         double tolerance = 0.01;
@@ -78,18 +69,16 @@ public class InventoryManagement {
             R0 = Rn;
         } while (true);
 
-        // Sonuçları göster
+
         double safetyStock = Rn-leadTimeDemand;
         double averageAnnualHoldingCost = ((Qn / 2) + Rn-leadTimeDemand) * holdingCost;
         double averageSetupCost = (annualDemand / Qn) * orderingCost;
         double averagePenaltyCost = (penaltyCost*annualDemand*nR)/Qn;
         double averageTimeBetweenOrders = 12*Qn / annualDemand;
-
-        //Bu İKİ kısımdan emin değilim tekrar bakılacak. slaytta var.
         double proportionOfOrderCyclesWithNoStockout = FRn;
         double proportionOfDemandNotMet = nR/Qn;
 
-        System.out.println("------------------------------------\n" + "ASIL İSTENENLER.\n" + "------------------------------------");
+        System.out.println("------------------------------------\n" + "Calculation Results\n" + "------------------------------------");
         System.out.println("Optimal lot size (Q): " + Qn);
         System.out.println("Reorder point (R): " + Rn);
         System.out.println("Number of iterations: " + iteration);

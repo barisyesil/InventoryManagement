@@ -19,7 +19,7 @@ public class ZChart {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.startsWith("#")) continue; // Yorum satırlarını atla
+                if (line.startsWith("#")) continue;
                 String[] parts = line.split("\t");
                 double z = Double.parseDouble(parts[0]);
                 double f = Double.parseDouble(parts[1]);
@@ -36,10 +36,8 @@ public class ZChart {
         if (fValues.containsKey(z)) {
             return fValues.get(z);
         }
-        // En yakın anahtar değerlerini bul
         Map.Entry<Double, Double> lowerEntry = fValues.floorEntry(z);
         Map.Entry<Double, Double> higherEntry = fValues.ceilingEntry(z);
-        // En yakın değeri döndür
         if (lowerEntry == null && higherEntry == null) {
             return 0.0;
         } else if (lowerEntry == null) {
@@ -57,10 +55,8 @@ public class ZChart {
         if (lValues.containsKey(z)) {
             return lValues.get(z);
         }
-        // En yakın anahtar değerlerini bul
         Map.Entry<Double, Double> lowerEntry = lValues.floorEntry(z);
         Map.Entry<Double, Double> higherEntry = lValues.ceilingEntry(z);
-        // En yakın değeri döndür
         if (lowerEntry == null && higherEntry == null) {
             return 0.0;
         } else if (lowerEntry == null) {
@@ -86,4 +82,4 @@ public class ZChart {
         }
         return closestZ;
     }
-}
+  }
